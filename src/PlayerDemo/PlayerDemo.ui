@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>PlayerDemo</string>
   </property>
-  <widget class="QOpenGLWidget" name="openGLWidget">
+  <widget class="XVideoWidget" name="video">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -25,6 +25,13 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>XVideoWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>XVideoWidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="PlayerDemo.qrc"/>
  </resources>

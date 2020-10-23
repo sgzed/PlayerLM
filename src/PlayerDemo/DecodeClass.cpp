@@ -20,7 +20,7 @@ bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para)
     
     Close();
 
-	///ÕÒµ½½âÂëÆ÷
+	///æ‰¾åˆ°è§£ç å™¨
 	AVCodec* codec = avcodec_find_decoder(para->codec_id);
 	if (!codec) {
 		cout << "can't find the codec id " << para->codec_id << endl;
@@ -33,10 +33,10 @@ bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para)
 	mCodecCtx = avcodec_alloc_context3(codec);
 	avcodec_parameters_to_context(mCodecCtx, para.get());
 
-	//8Ïß³Ì½âÂë
+	//8çº¿ç¨‹è§£ç 
 	mCodecCtx->thread_count = 8;
 
-	///´ò¿ª½âÂëÆ÷ÉÏÏÂÎÄ
+	///æ‰“å¼€è§£ç å™¨ä¸Šä¸‹æ–‡
 	int ret = avcodec_open2(mCodecCtx, 0, 0);
 	
 	if (ret != 0) {
@@ -51,15 +51,15 @@ bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para)
 	return true;
 }
 
-//·¢ËÍµ½½âÂëÏß³Ì
+//å‘é€åˆ°è§£ç çº¿ç¨‹
 bool DecodeClass::Send(std::shared_ptr<AVPacket> pkt)
 {
-	//Èİ´í´¦Àí
+	//å®¹é”™å¤„ç†
 	if (!pkt || pkt->size <= 0 || !pkt->data) {
 		return false;
 	}
 
-	lock_guard<mutex> lck(mMtx);
+	//lock_guard<mutex> lck(mMtx);
 
 	if (!mCodecCtx) {
 		return false;
@@ -75,7 +75,7 @@ bool DecodeClass::Send(std::shared_ptr<AVPacket> pkt)
 shared_ptr<AVFrame> DecodeClass::Recv()
 {
 	
-	lock_guard<mutex> lck(mMtx);
+	//lock_guard<mutex> lck(mMtx);
 	if (!mCodecCtx) {
 		return nullptr;
 	}
@@ -87,7 +87,8 @@ shared_ptr<AVFrame> DecodeClass::Recv()
 		return nullptr;
 	}
 
-	cout << "[" << frame->linesize[0] << "] " << flush;
+	pts = frame->pts;
+	//cout << "[" << frame->linesize[0] << "] " << flush;
 	return frame;
 }
 
@@ -98,6 +99,7 @@ void DecodeClass::Close()
 		avcodec_close(mCodecCtx);
 		avcodec_free_context(&mCodecCtx);
 	}
+	pts = 0;
 }
 
 void DecodeClass::Clear()

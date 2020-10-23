@@ -68,6 +68,9 @@ bool DemuxClass::Open(const char* url)
 	mVideoStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
 	AVStream* as = mFmtCtx->streams[mVideoStream];
 
+	width = as->codecpar->width;
+	height = as->codecpar->height;
+
 	cout << "=======================================================" << endl;
 	cout << "视频信息" << endl;
 	cout << "codec_id = " << as->codecpar->codec_id << endl;
@@ -79,9 +82,14 @@ bool DemuxClass::Open(const char* url)
 
 	cout << "=======================================================" << endl;
 	cout << "音频信息" << endl;
+
 	//获取音频流
 	mAudioStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 	as = mFmtCtx->streams[mAudioStream];
+
+	sampleRate = as->codecpar->sample_rate;
+	channels = as->codecpar->channels;
+
 	cout << "codec_id = " << as->codecpar->codec_id << endl;
 	cout << "format = " << as->codecpar->format << endl;
 	cout << "sample_rate = " << as->codecpar->sample_rate << endl;
@@ -112,7 +120,7 @@ shared_ptr<AVPacket> DemuxClass::Read()
 	//pts转换为毫秒
 	pkt->pts = pkt->pts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
 	pkt->dts = pkt->dts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
-	cout << pkt->pts << " " << flush;
+	//cout << pkt->pts << " " << flush;
 	return pkt;
 }
 
@@ -190,6 +198,51 @@ void DemuxClass::Close()
 	avformat_close_input(&mFmtCtx);
 	totalMs = 0;
 }
+
+//AVPixelFormat DemuxClass::GetHwFormat(AVCodecContext* ctx, const AVPixelFormat* pix_fmts)
+//{
+//	const enum AVPixelFormat* p;
+//
+//	for (p = pix_fmts; *p != -1; p++) {
+//		if (*p == mFmtCtx->streams[mVideoStream].hw_pix_fmt) {
+//			return *p;
+//		}
+//	}
+//
+//	fprintf(stderr, "Failed to get HW surface format.\n");
+//	return AV_PIX_FMT_NONE;
+//
+//}
+
+//bool DemuxClass::GetCudaDecoder(AVStream* stream)
+//{
+//	if (!mFmtCtx) {
+//		return false;
+//	}
+//
+//	int ret = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_VIDEO, -1, -1, &find_codec, 0);
+//	if (ret < 0) {
+//		return false;
+//	}
+//
+//	for (int i = 0;; i++) {
+//		const AVCodecHWConfig* config = avcodec_get_hw_config(find_codec, i);
+//		if (!config) {
+//			// 没找到cuda解码器，不能使用;
+//			return false;
+//		}
+//		if (config->device_type == AV_HWDEVICE_TYPE_CUDA) {
+//			// 找到了cuda解码器，记录对应的AVPixelFormat,后面get_format需要使用;
+//			m_AVStreamInfo.hw_pix_fmt = config->pix_fmt;
+//			m_AVStreamInfo.device_type = AV_HWDEVICE_TYPE_CUDA;
+//			break;
+//		}
+//	}
+//	AVCodecContext* decoder_ctx = avcodec_alloc_context3(find_codec);
+//
+//
+//	return true;
+//}
 
 
 

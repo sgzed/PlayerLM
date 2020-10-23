@@ -14,14 +14,17 @@ public:
 
 	bool isAudio = false;
 
-	//´ò¿ª½âÂëÆ÷,²»¹Ü³É¹¦Óë·ñ¶¼ÊÍ·Åpara¿Õ¼ä
+	//å½“å‰è§£ç åˆ°çš„Pts
+	long long pts = 0;
+
+	//æ‰“å¼€è§£ç å™¨,ä¸ç®¡æˆåŠŸä¸å¦éƒ½é‡Šæ”¾paraç©ºé—´
 	virtual bool Open(std::shared_ptr<AVCodecParameters> para);
 
-	//·¢ËÍµ½½âÂëÏß³Ì
+	//å‘é€åˆ°è§£ç çº¿ç¨‹
 	virtual bool Send(std::shared_ptr<AVPacket> pkt);
 
-	//»ñÈ¡½âÂëÊı¾İ£¬Ò»´Îsend¿ÉÄÜĞèÒª¶à´ÎRecv£¬»ñÈ¡»º³åÖĞµÄÊı¾İSend NULLÔÚRecv¶à´Î
-	//Ã¿´Î¸´ÖÆÒ»·İ£¬ÓÉµ÷ÓÃÕßÊÍ·Å av_frame_free
+	//è·å–è§£ç æ•°æ®ï¼Œä¸€æ¬¡sendå¯èƒ½éœ€è¦å¤šæ¬¡Recvï¼Œè·å–ç¼“å†²ä¸­çš„æ•°æ®Send NULLåœ¨Recvå¤šæ¬¡
+	//æ¯æ¬¡å¤åˆ¶ä¸€ä»½ï¼Œç”±è°ƒç”¨è€…é‡Šæ”¾ av_frame_free
 	virtual std::shared_ptr<AVFrame> Recv();
 
 	virtual void Close();

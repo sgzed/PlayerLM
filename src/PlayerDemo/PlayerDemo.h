@@ -10,6 +10,6 @@ class PlayerDemo : public QWidget
 public:
     PlayerDemo(QWidget *parent = Q_NULLPTR);
 
-private:
+//private:
     Ui::PlayerDemoClass ui;
 };

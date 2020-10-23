@@ -8,6 +8,8 @@ struct AVPacket;
 struct AVCodecParameters;
 struct AVFrame;
 
+struct AVStream;
+
 class DemuxClass
 {
 public:
@@ -34,8 +36,21 @@ public:
 	virtual void Clear();
 	virtual void Close();
 
+	//AVPixelFormat GetHwFormat(AVCodecContext* ctx, const AVPixelFormat* pix_fmts);
+
+	//打开Cuda硬解码器
+	//bool GetCudaDecoder(AVStream* stream);
+
 	//媒体总时长（毫秒）
 	int totalMs = 0;
+
+	int width = 0;
+	int height = 0;
+
+	int sampleRate = 44100;
+	int channels = 2;
+
+	//AVCodec* find_codec = nullptr;
 
 protected:
 
