@@ -20,6 +20,8 @@ int main(int argc, char *argv[])
 
     PlayThread player;
     player.Open("1920_1080.mp4", w.ui.video);
+    //player.Open("DeskPortal_TikTok_1440p_Ep_02.mp4", w.ui.video);
+    
     player.Start();
 
     return a.exec();

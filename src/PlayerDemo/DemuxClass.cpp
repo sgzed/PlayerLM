@@ -37,12 +37,12 @@ bool DemuxClass::Open(const char* url)
 
 	lock_guard<mutex> lck(mMtx);
 
-	//²ÎÊıÉèÖÃ
+	//å‚æ•°è®¾ç½®
 	AVDictionary* opts = NULL;
 
 	int re = avformat_open_input(&mFmtCtx, url,
-		nullptr,  // 0±íÊ¾×Ô¶¯Ñ¡Ôñ½â·âÆ÷
-		&opts //²ÎÊıÉèÖÃ£¬±ÈÈçrtspµÄÑÓÊ±Ê±¼ä
+		nullptr,  // 0è¡¨ç¤ºè‡ªåŠ¨é€‰æ‹©è§£å°å™¨
+		&opts //å‚æ•°è®¾ç½®ï¼Œæ¯”å¦‚rtspçš„å»¶æ—¶æ—¶é—´
 	);
 
 	if (re != 0){
@@ -53,18 +53,18 @@ bool DemuxClass::Open(const char* url)
 	}
 	cout << "open " << url << " success! " << endl;
 
-	//»ñÈ¡Á÷ĞÅÏ¢ 
+	//è·å–æµä¿¡æ¯ 
 	re = avformat_find_stream_info(mFmtCtx, 0);
 
-	//×ÜÊ±³¤ ºÁÃë
+	//æ€»æ—¶é•¿ æ¯«ç§’
 	totalMs = mFmtCtx->duration / (AV_TIME_BASE / 1000);
 	cout << "totalMs = " << totalMs << endl;
 
-	//´òÓ¡ÊÓÆµÁ÷ÏêÏ¸ĞÅÏ¢
+	//æ‰“å°è§†é¢‘æµè¯¦ç»†ä¿¡æ¯
 	av_dump_format(mFmtCtx, 0, url, 0);
 
 
-	//»ñÈ¡ÊÓÆµÁ÷
+	//è·å–è§†é¢‘æµ
 	mVideoStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
 	AVStream* as = mFmtCtx->streams[mVideoStream];
 
@@ -72,18 +72,18 @@ bool DemuxClass::Open(const char* url)
 	height = as->codecpar->height;
 
 	cout << "=======================================================" << endl;
-	cout << "ÊÓÆµĞÅÏ¢" << endl;
+	cout << "è§†é¢‘ä¿¡æ¯" << endl;
 	cout << "codec_id = " << as->codecpar->codec_id << endl;
 	cout << "format = " << as->codecpar->format << endl;
 	cout << "width=" << as->codecpar->width << endl;
 	cout << "height=" << as->codecpar->height << endl;
-	//Ö¡ÂÊ fps ·ÖÊı×ª»»
+	//å¸§ç‡ fps åˆ†æ•°è½¬æ¢
 	cout << "video fps = " << r2d(as->avg_frame_rate) << endl;
 
 	cout << "=======================================================" << endl;
-	cout << "ÒôÆµĞÅÏ¢" << endl;
+	cout << "éŸ³é¢‘ä¿¡æ¯" << endl;
 
-	//»ñÈ¡ÒôÆµÁ÷
+	//è·å–éŸ³é¢‘æµ
 	mAudioStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 	as = mFmtCtx->streams[mAudioStream];
 
@@ -95,7 +95,7 @@ bool DemuxClass::Open(const char* url)
 	cout << "sample_rate = " << as->codecpar->sample_rate << endl;
 	//AVSampleFormat;
 	cout << "channels = " << as->codecpar->channels << endl;
-	//Ò»Ö¡Êı¾İ£¿£¿ µ¥Í¨µÀÑù±¾Êı 
+	//ä¸€å¸§æ•°æ®ï¼Ÿï¼Ÿ å•é€šé“æ ·æœ¬æ•° 
 	cout << "frame_size = " << as->codecpar->frame_size << endl;
 
 	return true;
@@ -111,16 +111,39 @@ shared_ptr<AVPacket> DemuxClass::Read()
 
 	shared_ptr<AVPacket> pkt(av_packet_alloc(), freePkt);
 
-	//¶ÁÈ¡Ò»Ö¡£¬²¢·ÖÅä¿Õ¼ä
+	//è¯»å–ä¸€å¸§ï¼Œå¹¶åˆ†é…ç©ºé—´
 	int re = av_read_frame(mFmtCtx, pkt.get());
 	if (re != 0) {
 		return nullptr;
 	}
 
-	//pts×ª»»ÎªºÁÃë
+	//ptsè½¬æ¢ä¸ºæ¯«ç§’
 	pkt->pts = pkt->pts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
 	pkt->dts = pkt->dts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
 	//cout << pkt->pts << " " << flush;
+	return pkt;
+}
+
+std::shared_ptr<AVPacket> DemuxClass::ReadVideo()
+{
+	lock_guard<mutex> lck(mMtx);
+
+	if (!mFmtCtx) {
+		return nullptr;
+	}
+
+	shared_ptr<AVPacket> pkt =nullptr;
+
+	for (int i = 0; i < 20; ++i) {
+		pkt = Read();
+		if (!pkt || pkt->stream_index == mVideoStream) {
+			break;
+		}
+		else {
+			pkt.reset();
+			continue;
+		}
+	}
 	return pkt;
 }
 
@@ -132,7 +155,7 @@ bool DemuxClass::IsAudio(std::shared_ptr<AVPacket> pkt)
 	return true;
 }
 
-//»ñÈ¡ÊÓÆµ²ÎÊı  ·µ»ØµÄ¿Õ¼äĞèÒªÇåÀí  avcodec_parameters_free
+//è·å–è§†é¢‘å‚æ•°  è¿”å›çš„ç©ºé—´éœ€è¦æ¸…ç†  avcodec_parameters_free
 std::shared_ptr<AVCodecParameters> DemuxClass::CopyVPara()
 {
 	lock_guard<mutex> lck(mMtx);
@@ -146,7 +169,7 @@ std::shared_ptr<AVCodecParameters> DemuxClass::CopyVPara()
 	return pa;
 }
 
-//»ñÈ¡ÒôÆµ²ÎÊı  ·µ»ØµÄ¿Õ¼äĞèÒªÇåÀí  avcodec_parameters_free
+//è·å–éŸ³é¢‘å‚æ•°  è¿”å›çš„ç©ºé—´éœ€è¦æ¸…ç†  avcodec_parameters_free
 std::shared_ptr<AVCodecParameters> DemuxClass::CopyAPara()
 {
 	lock_guard<mutex> lck(mMtx);
@@ -228,11 +251,11 @@ void DemuxClass::Close()
 //	for (int i = 0;; i++) {
 //		const AVCodecHWConfig* config = avcodec_get_hw_config(find_codec, i);
 //		if (!config) {
-//			// Ã»ÕÒµ½cuda½âÂëÆ÷£¬²»ÄÜÊ¹ÓÃ;
+//			// æ²¡æ‰¾åˆ°cudaè§£ç å™¨ï¼Œä¸èƒ½ä½¿ç”¨;
 //			return false;
 //		}
 //		if (config->device_type == AV_HWDEVICE_TYPE_CUDA) {
-//			// ÕÒµ½ÁËcuda½âÂëÆ÷£¬¼ÇÂ¼¶ÔÓ¦µÄAVPixelFormat,ºóÃæget_formatĞèÒªÊ¹ÓÃ;
+//			// æ‰¾åˆ°äº†cudaè§£ç å™¨ï¼Œè®°å½•å¯¹åº”çš„AVPixelFormat,åé¢get_formatéœ€è¦ä½¿ç”¨;
 //			m_AVStreamInfo.hw_pix_fmt = config->pix_fmt;
 //			m_AVStreamInfo.device_type = AV_HWDEVICE_TYPE_CUDA;
 //			break;

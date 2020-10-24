@@ -18,30 +18,32 @@ public:
 
 	virtual bool Open(const char* url);
 
-	//¿Õ¼äĞèÒªµ÷ÓÃÕßÊÍ·Å £¬ÊÍ·ÅAVPacket¶ÔÏó¿Õ¼ä£¬ºÍÊı¾İ¿Õ¼ä av_packet_free
+	//ç©ºé—´éœ€è¦è°ƒç”¨è€…é‡Šæ”¾ ï¼Œé‡Šæ”¾AVPacketå¯¹è±¡ç©ºé—´ï¼Œå’Œæ•°æ®ç©ºé—´ av_packet_free
 	virtual std::shared_ptr<AVPacket> Read();
+
+	virtual std::shared_ptr<AVPacket> ReadVideo();
 
 	bool IsAudio(std::shared_ptr<AVPacket> pkt);
 
-	//»ñÈ¡ÊÓÆµ²ÎÊı  ·µ»ØµÄ¿Õ¼äĞèÒªÇåÀí  avcodec_parameters_free
+	//è·å–è§†é¢‘å‚æ•°  è¿”å›çš„ç©ºé—´éœ€è¦æ¸…ç†  avcodec_parameters_free
 	virtual std::shared_ptr<AVCodecParameters> CopyVPara();
 
-	//»ñÈ¡ÒôÆµ²ÎÊı  ·µ»ØµÄ¿Õ¼äĞèÒªÇåÀí avcodec_parameters_free
+	//è·å–éŸ³é¢‘å‚æ•°  è¿”å›çš„ç©ºé—´éœ€è¦æ¸…ç† avcodec_parameters_free
 	virtual std::shared_ptr<AVCodecParameters> CopyAPara();
 
-	//seek Î»ÖÃ pos 0.0 ~1.0
+	//seek ä½ç½® pos 0.0 ~1.0
 	virtual bool Seek(double pos);
 
-	//Çå¿Õ¶ÁÈ¡»º´æ
+	//æ¸…ç©ºè¯»å–ç¼“å­˜
 	virtual void Clear();
 	virtual void Close();
 
 	//AVPixelFormat GetHwFormat(AVCodecContext* ctx, const AVPixelFormat* pix_fmts);
 
-	//´ò¿ªCudaÓ²½âÂëÆ÷
+	//æ‰“å¼€Cudaç¡¬è§£ç å™¨
 	//bool GetCudaDecoder(AVStream* stream);
 
-	//Ã½Ìå×ÜÊ±³¤£¨ºÁÃë£©
+	//åª’ä½“æ€»æ—¶é•¿ï¼ˆæ¯«ç§’ï¼‰
 	int totalMs = 0;
 
 	int width = 0;
@@ -55,10 +57,10 @@ public:
 protected:
 
 	std::mutex mMtx;
-	//½â·â×°ÉÏÏÂÎÄ
-	AVFormatContext* mFmtCtx = nullptr;
-	//ÒôÊÓÆµË÷Òı
+	//éŸ³è§†é¢‘ç´¢å¼•
 	int mVideoStream;
 	int mAudioStream;
+	//è§£å°è£…ä¸Šä¸‹æ–‡
+	AVFormatContext* mFmtCtx = nullptr;
 };
 
