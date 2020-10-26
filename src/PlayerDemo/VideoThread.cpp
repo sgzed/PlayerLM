@@ -1,5 +1,6 @@
 #include "VideoThread.h"
 #include "DecodeClass.h"
+#include "D3DVideoWidget.h"
 
 bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para, IVideoCall* call, int width, int height)
 {
@@ -9,10 +10,20 @@ bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para, IVideoCall* call
     std::lock_guard<std::mutex> lck(vmux);
     this->call = call;
     if (this->call) {
-        this->call->Init(width, height);
+        //this->call->Init(width, height);
     }
+	return true;
+   // return decode->Open(para,call,true);
+}
 
-    return decode->Open(para);
+bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para, D3DVideoWidget* call)
+{
+	if (!para) return false;
+	Clear();
+
+	std::lock_guard<std::mutex> lck(vmux);
+	this->d3dCall = call;
+	return decode->Open(para, call, true);
 }
 
 bool VideoThread::RepaintPts(std::shared_ptr<AVPacket> pkt, long long seekPts)
@@ -68,6 +79,10 @@ void VideoThread::run()
 			
 			if (call) {
 				call->Repaint(frame);
+			}
+
+			if (d3dCall) {
+				d3dCall->Repaint(frame);
 			}
 		}
 		vmux.unlock();

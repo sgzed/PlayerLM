@@ -4,6 +4,7 @@ struct AVCodecParameters;
 struct AVCodecContext;
 struct AVFrame;
 struct AVPacket;
+class D3DVideoWidget;
 
 #include <mutex>
 #include <memory>
@@ -14,11 +15,14 @@ public:
 
 	bool isAudio = false;
 
+	//是否启用了硬解码
+	bool bAccel = false;
+
 	//当前解码到的Pts
 	long long pts = 0;
 
 	//打开解码器,不管成功与否都释放para空间
-	virtual bool Open(std::shared_ptr<AVCodecParameters> para);
+	virtual bool Open(std::shared_ptr<AVCodecParameters> para, D3DVideoWidget* widget = nullptr,bool bAccel = false);
 
 	//发送到解码线程
 	virtual bool Send(std::shared_ptr<AVPacket> pkt);

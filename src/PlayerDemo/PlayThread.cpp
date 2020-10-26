@@ -41,6 +41,41 @@ bool PlayThread::Open(const char* url, IVideoCall* call)
 	return re;
 }
 
+bool PlayThread::Open(const char* url, D3DVideoWidget* call)
+{
+	if (url == 0 || url[0] == '\0')
+		return false;
+
+	std::lock_guard<std::mutex> lck(mux);
+
+	if (!demux) demux = new DemuxClass();
+	if (!vt) vt = new VideoThread();
+	if (!at) at = new AudioThread();
+
+	//打开解封装
+	bool re = demux->Open(url);
+	if (!re) {
+		cout << "demux->Open(url) failed!" << endl;
+		return false;
+	}
+	totalMs = demux->totalMs;
+
+	//打开视频解码器和处理线程
+	if (!vt->Open(demux->CopyVPara(), call)) {
+	//if (!vt->Open(demux->CopyVPara(), call, demux->width, demux->height)) {
+		re = false;
+		cout << "vt->Open failed!" << endl;
+	}
+	//打开音频解码器和处理线程
+	if (!at->Open(demux->CopyAPara(), demux->sampleRate, demux->channels)) {
+		re = false;
+		cout << "at->Open failed!" << endl;
+	}
+
+	cout << "PlayThread::Open " << re << endl;
+	return re;
+}
+
 
 void PlayThread::Start()
 {
@@ -141,10 +176,11 @@ void PlayThread::run()
 		}
 		else {    //视频
 			if (vt) vt->Push(pkt);
+			msleep(14);
 		}
 
 		mux.unlock();
-		msleep(1);
+		//msleep(1);
 	}
 }
 

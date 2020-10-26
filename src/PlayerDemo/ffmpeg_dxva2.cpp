@@ -400,8 +400,13 @@ static int dxva2_alloc(AVCodecContext *s, HWND hwnd)
 		ctx->d3d9device = NULL;
 	}
 
-	hr = IDirect3D9_CreateDevice(ctx->d3d9, adapter, D3DDEVTYPE_HAL, hwnd, BehaviorFlags, &d3dpp, &ctx->d3d9device);
+	/*hr = IDirect3D9_CreateDevice(ctx->d3d9, adapter, D3DDEVTYPE_HAL, hwnd, BehaviorFlags, &d3dpp, &ctx->d3d9device);
     if (FAILED(hr)) {
+        av_log(NULL, loglevel, "Failed to create Direct3D device\n");
+        goto fail;
+    }*/
+    int ret = ctx->d3d9->CreateDevice(adapter, D3DDEVTYPE_HAL, hwnd, BehaviorFlags, &d3dpp, &ctx->d3d9device);
+    if (ret < 0) {
         av_log(NULL, loglevel, "Failed to create Direct3D device\n");
         goto fail;
     }
@@ -559,7 +564,7 @@ static int dxva2_create_decoder(AVCodecContext *s)
 			}
 		}
 
-		system("pause");
+		//system("pause");
 
         for (j = 0; j < target_count; j++) {
             const D3DFORMAT format = target_list[j];

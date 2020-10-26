@@ -4,15 +4,16 @@ extern "C"
 {
 #include<libavcodec/avcodec.h>
 }
+
+#include "D3DVideoWidget.h"
 #include <iostream>
 using namespace std;
-
 
 static void freeFrame(AVFrame* frame) {
 	av_frame_free(&frame);
 }
 
-bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para)
+bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para, D3DVideoWidget* widget,bool bAccel)
 {
     if (!para) {
         return false;
@@ -34,8 +35,7 @@ bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para)
 	avcodec_parameters_to_context(mCodecCtx, para.get());
 
 	//8线程解码
-	mCodecCtx->thread_count = 8;
-
+	//mCodecCtx->thread_count = 8;
 	///打开解码器上下文
 	int ret = avcodec_open2(mCodecCtx, 0, 0);
 	
@@ -48,6 +48,12 @@ bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para)
 	}
 
 	cout << " avcodec_open2 success!" << endl;
+
+	this->bAccel = bAccel;
+	if (bAccel && mCodecCtx->codec_type == AVMEDIA_TYPE_VIDEO) {
+		bAccel = widget->Init(codec, mCodecCtx);
+	}
+
 	return true;
 }
 
