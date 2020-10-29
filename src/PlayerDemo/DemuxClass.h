@@ -52,6 +52,8 @@ public:
 	int sampleRate = 44100;
 	int channels = 2;
 
+	double mVideoTimeBase = 0;
+	double mAudioTimeBase = 0;
 	//AVCodec* find_codec = nullptr;
 
 protected:

@@ -14,6 +14,10 @@ class XVideoWidget : public QOpenGLWidget, protected QOpenGLFunctions, public IV
 	Q_OBJECT
 
 public:
+	void Init(DecodeClass* decode) {
+
+	}
+
 	void Init(int width, int height);
 	
 	//不管成功与否都释放frame空间

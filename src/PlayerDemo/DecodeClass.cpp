@@ -5,7 +5,6 @@ extern "C"
 #include<libavcodec/avcodec.h>
 }
 
-#include "D3DVideoWidget.h"
 #include <iostream>
 using namespace std;
 
@@ -13,7 +12,7 @@ static void freeFrame(AVFrame* frame) {
 	av_frame_free(&frame);
 }
 
-bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para, D3DVideoWidget* widget,bool bAccel)
+bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para)
 {
     if (!para) {
         return false;
@@ -21,8 +20,9 @@ bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para, D3DVideoWidget* 
     
     Close();
 
+	mPara = para;
 	///找到解码器
-	AVCodec* codec = avcodec_find_decoder(para->codec_id);
+	codec = avcodec_find_decoder(para->codec_id);
 	if (!codec) {
 		cout << "can't find the codec id " << para->codec_id << endl;
 		return false;
@@ -48,13 +48,12 @@ bool DecodeClass::Open(std::shared_ptr<AVCodecParameters> para, D3DVideoWidget* 
 	}
 
 	cout << " avcodec_open2 success!" << endl;
-
-	this->bAccel = bAccel;
-	if (bAccel && mCodecCtx->codec_type == AVMEDIA_TYPE_VIDEO) {
-		bAccel = widget->Init(codec, mCodecCtx);
-	}
-
 	return true;
+}
+
+bool DecodeClass::HwAcceleration(HWND hwnd)
+{
+	return false;
 }
 
 //发送到解码线程
@@ -93,9 +92,14 @@ shared_ptr<AVFrame> DecodeClass::Recv()
 		return nullptr;
 	}
 
-	pts = frame->pts;
+	//pts = frame->pts;
+	pts = av_frame_get_best_effort_timestamp(frame.get());
 	//cout << "[" << frame->linesize[0] << "] " << flush;
 	return frame;
+}
+
+void DecodeClass::RetrieveFrame(std::shared_ptr<AVFrame> frame)
+{
 }
 
 void DecodeClass::Close()

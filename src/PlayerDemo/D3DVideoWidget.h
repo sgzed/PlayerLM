@@ -3,16 +3,13 @@
 #include <qwidget.h>
 #include "IVideoCall.h"
 
-struct AVCodec;
-struct AVCodecContext;
-
 class D3DVideoWidget : public QWidget, public IVideoCall
 {
 	Q_OBJECT
 
 public:
 	
-	bool Init(AVCodec* codec,AVCodecContext* codecCtx);
+	void Init(DecodeClass* decode) override;
 
 	//不管成功与否都释放frame空间
 	virtual void Repaint(std::shared_ptr<AVFrame> frame);
@@ -21,7 +18,7 @@ public:
 
 	~D3DVideoWidget();
 
-private:
-	AVCodecContext* mCodecCtx;
+	//是否启用了硬解码
+	bool bAccel = false;
 };
 

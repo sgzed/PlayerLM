@@ -24,8 +24,11 @@ public:
 	virtual void Close();
 
 	//最大队列
-	int maxList = 200;
+	int maxList = 500;
 	bool isExit = false;
+
+	//时间基
+	double timeBase = 0;
 
 protected:
 	DecodeClass* decode = 0;

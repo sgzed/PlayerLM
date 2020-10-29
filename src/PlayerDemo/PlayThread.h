@@ -14,7 +14,7 @@ class PlayThread : public QThread
 public:
 	virtual bool Open(const char* url,IVideoCall* call);
 
-	virtual bool Open(const char* url, D3DVideoWidget* call);
+	//virtual bool Open(const char* url, D3DVideoWidget* call);
 
 	//启动所有线程
 	virtual void Start();

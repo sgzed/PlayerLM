@@ -276,6 +276,9 @@ RECT m_rtViewport;
 RECT m_rtViewport2;
 IDirect3DSurface9 * m_pDirect3DSurfaceRender = NULL;
 IDirect3DSurface9 * m_pBackBuffer = NULL;
+
+IDirect3DSurface9* m_pBackBuffer2 = NULL;
+
 static int dxva2_retrieve_data(AVCodecContext *s, AVFrame *frame)
 {
     LPDIRECT3DSURFACE9 surface = (LPDIRECT3DSURFACE9)frame->data[3];
@@ -283,25 +286,55 @@ static int dxva2_retrieve_data(AVCodecContext *s, AVFrame *frame)
     DXVA2Context       *ctx = (DXVA2Context *)ist->hwaccel_ctx;
 
 	EnterCriticalSection(&cs);
-
-	ctx->d3d9device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-	
-    ctx->d3d9device->BeginScene();
-	//if (m_pBackBuffer)
-	//{
-	//	m_pBackBuffer->Release();
-	//	m_pBackBuffer = NULL;
-	//}
-	ctx->d3d9device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &m_pBackBuffer); 
   
 	GetClientRect(d3dpp.hDeviceWindow, &m_rtViewport);
+
+    int width = m_rtViewport.right - m_rtViewport.left;
+    int height = m_rtViewport.top - m_rtViewport.bottom;
+
+    D3DVIEWPORT9 viewport1 = { 0, 0, width / 2, height / 2, 0.0f, 1.0f };
+    D3DVIEWPORT9 viewport2 = { width / 2, 0, width / 2, height / 2, 0.0f, 1.0f };
+    D3DVIEWPORT9 viewport3 = { 0, height / 2, width / 2, height / 2, 0.0f, 1.0f };
+    D3DVIEWPORT9 viewport4 = { width / 2, height / 2, width / 2, height / 2, 0.0f, 1.0f };
+
+    D3DVIEWPORT9 vps[] = { viewport1 ,viewport2,viewport3,viewport4 };
+
+    RECT rect1 = { 0, 0, 200,200};
+    RECT rect2 = {0, 200,200,400 };
+    RECT rect3 = { 200, 0,400,200 };
+    RECT rect4 = { 200,200,400,400};
+
+    RECT rects[] = { rect1,rect2,rect3,rect4 };
+
     RECT rect;
     rect.left = 0;
     rect.top = 0;
-    rect.right = 1000;
-    rect.bottom = 1000;
-    GetClientRect(d3dpp.hDeviceWindow, &rect);
-	ctx->d3d9device->StretchRect(surface, NULL, m_pBackBuffer, &m_rtViewport, D3DTEXF_LINEAR);
+    rect.right = 200;
+    rect.bottom = 200;
+
+ /*   m_rtViewport.left = 300;
+    m_rtViewport.top = 300;
+    m_rtViewport.right = 620;
+    m_rtViewport.bottom = 620;*/
+
+    ctx->d3d9device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+
+    ctx->d3d9device->BeginScene();
+    //if (m_pBackBuffer)
+    //{
+    //	m_pBackBuffer->Release();
+    //	m_pBackBuffer = NULL;
+    //}
+
+    ctx->d3d9device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &m_pBackBuffer);
+    ctx->d3d9device->StretchRect(surface, NULL, m_pBackBuffer, &m_rtViewport, D3DTEXF_LINEAR);
+   
+  /*  for (int i = 0; i < 2; ++i) {
+        ctx->d3d9device->SetViewport(&vps[i]);
+        ctx->d3d9device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+        ctx->d3d9device->StretchRect(surface, NULL, m_pBackBuffer, &rects[i], D3DTEXF_LINEAR);
+    }*/
+
 	ctx->d3d9device->EndScene();
 	ctx->d3d9device->Present(NULL, NULL, NULL, NULL);
 

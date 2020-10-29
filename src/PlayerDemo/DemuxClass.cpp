@@ -67,6 +67,7 @@ bool DemuxClass::Open(const char* url)
 	//获取视频流
 	mVideoStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
 	AVStream* as = mFmtCtx->streams[mVideoStream];
+	mVideoTimeBase = av_q2d(as->time_base);
 
 	width = as->codecpar->width;
 	height = as->codecpar->height;
@@ -87,6 +88,7 @@ bool DemuxClass::Open(const char* url)
 	mAudioStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 	as = mFmtCtx->streams[mAudioStream];
 
+	mAudioTimeBase = av_q2d(as->time_base);
 	sampleRate = as->codecpar->sample_rate;
 	channels = as->codecpar->channels;
 

@@ -3,8 +3,8 @@
 
 DecodeThread::DecodeThread()
 {
-    //打开解码器
-    if (!decode) decode = new DecodeClass();
+	//打开解码器
+	if (!decode) decode = new DecodeClass();
 }
 
 DecodeThread::~DecodeThread()
@@ -23,7 +23,8 @@ void DecodeThread::Push(std::shared_ptr<AVPacket> pkt)
 
 		mux.lock();
 
-		if (pkts.size() < maxList) {
+		//if (pkts.size() < maxList) {
+		{
 			pkts.push_back(pkt);
 			mux.unlock();
 			break;

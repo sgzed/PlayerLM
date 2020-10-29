@@ -23,13 +23,14 @@ int main(int argc, char *argv[])
     PlayThread player;
 
     D3DVideoWidget widget;
+    widget.resize(1280,720);
     widget.show();
 
    // HWND hwnd = (HWND)w.winId();
 
    // player.Open("1920_1080.mp4", w.ui.video);
-    player.Open("DeskPortal_TikTok_1440p_Ep_02.mp4", &widget);
-    
+    //player.Open("DeskPortal_TikTok_1440p_Ep_02.mp4", &widget);
+    player.Open("luming.mp4", &widget);
     //player.Open("DeskPortal_TikTok_1440p_Ep_02.mp4", w.ui.video);
     
     player.Start();
