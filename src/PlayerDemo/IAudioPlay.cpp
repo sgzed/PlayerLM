@@ -110,7 +110,6 @@ void CAudioPlay::SetPause(bool isPause)
 	else {
 		output->resume();
 	}
-
 }
 
 void CAudioPlay::Clear()

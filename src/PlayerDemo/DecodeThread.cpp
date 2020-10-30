@@ -45,6 +45,12 @@ std::shared_ptr<AVPacket> DecodeThread::Pop()
 	return pkt;
 }
 
+bool DecodeThread::PktsEmpty()
+{
+	std::lock_guard<std::mutex> lck(mux);
+	return pkts.empty();
+}
+
 void DecodeThread::Clear()
 {
 	decode->Clear();

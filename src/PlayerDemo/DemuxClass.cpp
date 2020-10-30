@@ -86,6 +86,12 @@ bool DemuxClass::Open(const char* url)
 
 	//获取音频流
 	mAudioStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
+
+	//不存在音频,视频怎么同步
+	if (mAudioStream < 0) {
+		return true;
+	}
+
 	as = mFmtCtx->streams[mAudioStream];
 
 	mAudioTimeBase = av_q2d(as->time_base);
@@ -116,19 +122,22 @@ shared_ptr<AVPacket> DemuxClass::Read()
 	//读取一帧，并分配空间
 	int re = av_read_frame(mFmtCtx, pkt.get());
 	if (re != 0) {
+		if (re == AVERROR_EOF) {
+			bFinished = true;
+		}
 		return nullptr;
 	}
 
 	//pts转换为毫秒
-	pkt->pts = pkt->pts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
-	pkt->dts = pkt->dts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
-	//cout << pkt->pts << " " << flush;
+	//pkt->pts = pkt->pts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
+	//pkt->dts = pkt->dts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
+	//cout << "packets pts : " <<  pkt->pts << " " << endl;
 	return pkt;
 }
 
 std::shared_ptr<AVPacket> DemuxClass::ReadVideo()
 {
-	lock_guard<mutex> lck(mMtx);
+	//lock_guard<mutex> lck(mMtx);
 
 	if (!mFmtCtx) {
 		return nullptr;
@@ -205,23 +214,20 @@ bool DemuxClass::Seek(double pos)
 void DemuxClass::Clear()
 {
 	lock_guard<mutex> lck(mMtx);
-
-	if (!mFmtCtx) {
-		return;
-	}
+	if (!mFmtCtx)	return;
+	
 	avformat_flush(mFmtCtx);
+	bFinished = false;
 }
 
 void DemuxClass::Close()
 {
 	lock_guard<mutex> lck(mMtx);
-
-	if (!mFmtCtx) {
-		return;
-	}
-
+	if (!mFmtCtx)	return;
+	
 	avformat_close_input(&mFmtCtx);
 	totalMs = 0;
+	bFinished = false;
 }
 
 //AVPixelFormat DemuxClass::GetHwFormat(AVCodecContext* ctx, const AVPixelFormat* pix_fmts)

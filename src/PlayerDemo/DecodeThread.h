@@ -18,6 +18,8 @@ public:
 	//取出一帧数据，并出栈，如果没有返回NULL
 	virtual std::shared_ptr<AVPacket> Pop();
 
+	virtual bool PktsEmpty();
+
 	//清理队列
 	virtual void Clear();
 	//清理资源，停止线程

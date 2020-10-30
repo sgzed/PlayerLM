@@ -9,7 +9,23 @@ class PlayerDemo : public QWidget
 
 public:
     PlayerDemo(QWidget *parent = Q_NULLPTR);
+    ~PlayerDemo();
 
-//private:
+    void timerEvent(QTimerEvent* e);
+
+    void SetPause(bool isPause);
+
+    //void resizeEvent(QResizeEvent* e);
+
+public slots:
+    void OpenFile();
+    void PlayOrPause();
+
+    void SliderPressed();
+    void SliderReleased();
+
+private:
+    bool isSliderPressed;
+    
     Ui::PlayerDemoClass ui;
 };

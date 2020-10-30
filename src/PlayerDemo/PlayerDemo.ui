@@ -6,34 +6,148 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
-    <height>525</height>
+    <width>903</width>
+    <height>624</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>PlayerDemo</string>
   </property>
-  <widget class="XVideoWidget" name="video">
+  <widget class="D3DVideoWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>30</y>
-     <width>681</width>
-     <height>441</height>
+     <y>40</y>
+     <width>821</width>
+     <height>461</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="openFile">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>520</y>
+     <width>75</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>打开文件</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="progress">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>570</y>
+     <width>781</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>999</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="isPlay">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>520</y>
+     <width>75</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>播放</string>
    </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>XVideoWidget</class>
-   <extends>QOpenGLWidget</extends>
-   <header>XVideoWidget.h</header>
+   <class>D3DVideoWidget</class>
+   <extends>QWidget</extends>
+   <header>D3DVideoWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
   <include location="PlayerDemo.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>openFile</sender>
+   <signal>clicked()</signal>
+   <receiver>PlayerDemoClass</receiver>
+   <slot>OpenFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>286</x>
+     <y>528</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>71</x>
+     <y>629</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>isPlay</sender>
+   <signal>clicked()</signal>
+   <receiver>PlayerDemoClass</receiver>
+   <slot>PlayOrPause()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>537</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>484</x>
+     <y>625</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>progress</sender>
+   <signal>sliderPressed()</signal>
+   <receiver>PlayerDemoClass</receiver>
+   <slot>SliderPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>158</x>
+     <y>581</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>170</x>
+     <y>642</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>progress</sender>
+   <signal>sliderReleased()</signal>
+   <receiver>PlayerDemoClass</receiver>
+   <slot>SliderReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>221</x>
+     <y>581</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>248</x>
+     <y>671</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>OpenFile()</slot>
+  <slot>PlayOrPause()</slot>
+  <slot>SliderPressed()</slot>
+  <slot>SliderReleased()</slot>
+ </slots>
 </ui>

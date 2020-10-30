@@ -46,6 +46,9 @@ public:
 	//媒体总时长（毫秒）
 	int totalMs = 0;
 
+	//读取packet结束
+	bool bFinished = false;
+
 	int width = 0;
 	int height = 0;
 

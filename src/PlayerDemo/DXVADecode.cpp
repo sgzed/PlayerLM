@@ -27,11 +27,11 @@ DXVADecode::~DXVADecode()
 bool DXVADecode::HwAcceleration(HWND hwnd)
 {
 	bAccel = false;
-	bool reset = true;
+	bool reset = false;
 
 	std::lock_guard<std::mutex> lck(mMtx);
 
-	if (mCodecCtx && mCodecCtx->codec_type != AVMEDIA_TYPE_VIDEO) {
+	if (mCodecCtx && mCodecCtx->codec_type == AVMEDIA_TYPE_VIDEO) {
 
 		switch (codec->id) {
 

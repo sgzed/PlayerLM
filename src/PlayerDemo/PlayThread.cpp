@@ -14,10 +14,6 @@ bool PlayThread::Open(const char* url, IVideoCall* call)
 
 	std::lock_guard<std::mutex> lck(mux);
 
-	if (!demux) demux = new DemuxClass();
-	if (!vt) vt = new VideoThread();
-	if (!at) at = new AudioThread();
-
 	//打开解封装
 	bool re = demux->Open(url);
 	if (!re) {
@@ -46,6 +42,10 @@ bool PlayThread::Open(const char* url, IVideoCall* call)
 void PlayThread::Start()
 {
 	std::lock_guard<std::mutex> lck(mux);
+
+	if (!demux) demux = new DemuxClass();
+	if (!vt) vt = new VideoThread();
+	if (!at) at = new AudioThread();
 
 	//启动当前线程
 	QThread::start();
@@ -92,7 +92,7 @@ void PlayThread::Seek(double progress)
 	}
 	demux->Seek(progress);
 	//实际要显示的pts
-	seekPts = demux->totalMs;
+	seekPts = progress * demux->totalMs;
 
 	while (!isExit) {
 		auto pkt = demux->ReadVideo();
@@ -126,11 +126,19 @@ void PlayThread::run()
 		
 		//同步
 		if (vt && at) {
+			pts = vt->pts;
 			vt->synPts = at->pts;
 		}
 		
 		auto pkt = demux->Read();
 		if (!pkt) {
+			
+			if(demux->bFinished && !isExit) {
+				if (vt->PktsEmpty() && at->PktsEmpty()) {
+					//cout << "paly end !!" << endl;
+				}
+			}
+
 			mux.unlock();
 			msleep(5);
 			continue;
