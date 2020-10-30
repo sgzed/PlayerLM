@@ -64,7 +64,7 @@ void VideoThread::run()
 			msleep(5);
 			continue;
 		}
-	
+
 		if (synPts >0 &&  synPts < decode->pts) {
 			vmux.unlock();
 			msleep(1);
@@ -88,6 +88,8 @@ void VideoThread::run()
 				call->Repaint(frame);
 			}
 		}
+
+		pts = decode->pts;
 		vmux.unlock();
 	}
 }

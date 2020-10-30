@@ -23,6 +23,8 @@ public:
 
 	virtual std::shared_ptr<AVPacket> ReadVideo();
 
+	bool IsAudioExist();
+
 	bool IsAudio(std::shared_ptr<AVPacket> pkt);
 
 	//获取视频参数  返回的空间需要清理  avcodec_parameters_free
@@ -54,6 +56,8 @@ public:
 
 	int sampleRate = 44100;
 	int channels = 2;
+
+	double frameRate = 0;
 
 	double mVideoTimeBase = 0;
 	double mAudioTimeBase = 0;

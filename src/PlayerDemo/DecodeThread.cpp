@@ -51,6 +51,11 @@ bool DecodeThread::PktsEmpty()
 	return pkts.empty();
 }
 
+void DecodeThread::SetTimeBase(double timeBase)
+{
+	if(decode)	decode->timeBase = timeBase;
+}
+
 void DecodeThread::Clear()
 {
 	decode->Clear();

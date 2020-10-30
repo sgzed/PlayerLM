@@ -20,6 +20,9 @@ public:
 
 	virtual bool PktsEmpty();
 
+	//设置decode的时间基
+	virtual void SetTimeBase(double timeBase);
+
 	//清理队列
 	virtual void Clear();
 	//清理资源，停止线程
@@ -28,9 +31,6 @@ public:
 	//最大队列
 	int maxList = 500;
 	bool isExit = false;
-
-	//时间基
-	double timeBase = 0;
 
 protected:
 	DecodeClass* decode = 0;

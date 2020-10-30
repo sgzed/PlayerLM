@@ -65,9 +65,7 @@ void AudioThread::SetPause(bool isPause)
 {
 	//std::lock_guard<std::mutex> lck(amux);
 	this->isPause = isPause;
-	if (ap) {
-		ap->SetPause(isPause);
-	}
+	if (ap)	ap->SetPause(isPause);
 }
 
 void AudioThread::run()

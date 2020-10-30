@@ -79,7 +79,7 @@ bool DemuxClass::Open(const char* url)
 	cout << "width=" << as->codecpar->width << endl;
 	cout << "height=" << as->codecpar->height << endl;
 	//帧率 fps 分数转换
-	cout << "video fps = " << r2d(as->avg_frame_rate) << endl;
+	cout << "video fps = " << (frameRate = r2d(as->avg_frame_rate)) << endl;
 
 	cout << "=======================================================" << endl;
 	cout << "音频信息" << endl;
@@ -88,23 +88,22 @@ bool DemuxClass::Open(const char* url)
 	mAudioStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 
 	//不存在音频,视频怎么同步
-	if (mAudioStream < 0) {
-		return true;
+	if (mAudioStream >= 0) {
+
+		as = mFmtCtx->streams[mAudioStream];
+
+		mAudioTimeBase = av_q2d(as->time_base);
+		sampleRate = as->codecpar->sample_rate;
+		channels = as->codecpar->channels;
+
+		cout << "codec_id = " << as->codecpar->codec_id << endl;
+		cout << "format = " << as->codecpar->format << endl;
+		cout << "sample_rate = " << as->codecpar->sample_rate << endl;
+		//AVSampleFormat;
+		cout << "channels = " << as->codecpar->channels << endl;
+		//一帧数据？？ 单通道样本数 
+		cout << "frame_size = " << as->codecpar->frame_size << endl;
 	}
-
-	as = mFmtCtx->streams[mAudioStream];
-
-	mAudioTimeBase = av_q2d(as->time_base);
-	sampleRate = as->codecpar->sample_rate;
-	channels = as->codecpar->channels;
-
-	cout << "codec_id = " << as->codecpar->codec_id << endl;
-	cout << "format = " << as->codecpar->format << endl;
-	cout << "sample_rate = " << as->codecpar->sample_rate << endl;
-	//AVSampleFormat;
-	cout << "channels = " << as->codecpar->channels << endl;
-	//一帧数据？？ 单通道样本数 
-	cout << "frame_size = " << as->codecpar->frame_size << endl;
 
 	return true;
 }
@@ -128,10 +127,9 @@ shared_ptr<AVPacket> DemuxClass::Read()
 		return nullptr;
 	}
 
-	//pts转换为毫秒
-	//pkt->pts = pkt->pts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
-	//pkt->dts = pkt->dts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
-	//cout << "packets pts : " <<  pkt->pts << " " << endl;
+	//pts转换为毫秒,后面AVFrame的时间就不需要做转换，已验证
+	pkt->pts = pkt->pts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
+	pkt->dts = pkt->dts * (1000 * (r2d(mFmtCtx->streams[pkt->stream_index]->time_base)));
 	return pkt;
 }
 
@@ -156,6 +154,11 @@ std::shared_ptr<AVPacket> DemuxClass::ReadVideo()
 		}
 	}
 	return pkt;
+}
+
+bool DemuxClass::IsAudioExist()
+{
+	return mAudioStream >= 0;
 }
 
 bool DemuxClass::IsAudio(std::shared_ptr<AVPacket> pkt)

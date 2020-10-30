@@ -64,13 +64,18 @@ bool DecodeClass::Send(std::shared_ptr<AVPacket> pkt)
 		return false;
 	}
 
-	//lock_guard<mutex> lck(mMtx);
+	int ret = 0;
 
-	if (!mCodecCtx) {
-		return false;
+	{
+		lock_guard<mutex> lck(mMtx);
+
+		if (!mCodecCtx) {
+			return false;
+		}
+
+		ret = avcodec_send_packet(mCodecCtx, pkt.get());
 	}
 
-	int ret = avcodec_send_packet(mCodecCtx, pkt.get());
 	if (ret != 0) {
 		return false;
 	}
@@ -88,13 +93,15 @@ shared_ptr<AVFrame> DecodeClass::Recv()
 	shared_ptr<AVFrame> frame(av_frame_alloc(), freeFrame);
 	int ret = avcodec_receive_frame(mCodecCtx, frame.get());
 	
-	if (ret != 0) {
-		return nullptr;
-	}
+	if (ret != 0)	return nullptr;
 
-	//pts = frame->pts;
+	/*pts = frame->pts;
+	if (timeBase) {
+		pts = pts * timeBase * 1000;
+		cout << "frame pts : " << pts << endl;
+	}*/
+
 	pts = av_frame_get_best_effort_timestamp(frame.get());
-	//cout << "[" << frame->linesize[0] << "] " << flush;
 	return frame;
 }
 

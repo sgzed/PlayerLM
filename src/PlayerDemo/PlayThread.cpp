@@ -21,18 +21,30 @@ bool PlayThread::Open(const char* url, IVideoCall* call)
 		return false;
 	}
 	totalMs = demux->totalMs;
-	vt->timeBase = demux->mVideoTimeBase;
-	vt->timeBase = demux->mAudioTimeBase;
-
+	
 	//打开视频解码器和处理线程
 	if (!vt->Open(demux->CopyVPara(), call)) {
 		re = false;
 		cout << "vt->Open failed!" << endl;
 	}
-	//打开音频解码器和处理线程
-	if (!at->Open(demux->CopyAPara(), demux->sampleRate, demux->channels)) {
-		re = false;
-		cout << "at->Open failed!" << endl;
+
+	if (demux->IsAudioExist()) {
+		if (!at) at = new AudioThread();
+		
+		//打开音频解码器和处理线程
+		if (!at->Open(demux->CopyAPara(), demux->sampleRate, demux->channels)) {
+			re = false;
+			cout << "at->Open failed!" << endl;
+		}
+	}
+	else {
+		if (at)	at->Close();
+		delete at;
+		at = nullptr;
+	}
+
+	if (re && demux->IsAudioExist()) {
+		if (at) at->start();
 	}
 	
 	cout << "PlayThread::Open " << re << endl;
@@ -45,13 +57,10 @@ void PlayThread::Start()
 
 	if (!demux) demux = new DemuxClass();
 	if (!vt) vt = new VideoThread();
-	if (!at) at = new AudioThread();
 
 	//启动当前线程
 	QThread::start();
-	if (vt)vt->start();
-	if (at)at->start();
-
+	if (vt)	vt->start();
 }
 
 void PlayThread::Close()
@@ -125,18 +134,27 @@ void PlayThread::run()
 		}
 		
 		//同步
-		if (vt && at) {
-			pts = vt->pts;
+		if (demux->IsAudioExist() && vt && at) {
 			vt->synPts = at->pts;
 		}
+
+		if (vt)	pts = vt->pts;
 		
 		auto pkt = demux->Read();
 		if (!pkt) {
 			
 			if(demux->bFinished && !isExit) {
-				if (vt->PktsEmpty() && at->PktsEmpty()) {
-					//cout << "paly end !!" << endl;
+				if (demux->IsAudioExist() ) {
+					if (vt->PktsEmpty() && at && at->PktsEmpty()) {
+						//cout << "paly end !!" << endl;
+					}
 				}
+				else {
+					if (vt->PktsEmpty()) {
+						//cout << "paly end !!" << endl;
+					}
+				}
+			
 			}
 
 			mux.unlock();
@@ -145,17 +163,21 @@ void PlayThread::run()
 		}
 		
 		//判断数据是音频
-		if (demux->IsAudio(pkt)) {
+		if (demux->IsAudioExist() && demux->IsAudio(pkt)) {
 			if (at) at->Push(pkt);
 			
 		}
 		else {    //视频
 			if (vt) vt->Push(pkt);
-			//msleep(10);
 		}
 
 		mux.unlock();
-		msleep(1);
+
+		if(demux->IsAudioExist())
+			msleep(1);
+		else {
+			msleep((double)1000 / demux->frameRate);
+		}
 	}
 }
 

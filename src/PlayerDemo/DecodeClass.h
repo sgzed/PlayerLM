@@ -42,6 +42,9 @@ public:
 	DecodeClass();
 	virtual ~DecodeClass();
 
+	//时间基
+	double timeBase = 0;
+
 protected:
 	AVCodec* codec = 0;
 	AVCodecContext* mCodecCtx = 0;
