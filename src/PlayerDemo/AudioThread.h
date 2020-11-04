@@ -21,6 +21,8 @@ public:
 
 	virtual void Clear();
 
+	void SetVolume(double volume);
+
 	void SetPause(bool isPause);
 	bool isPause = false;
 

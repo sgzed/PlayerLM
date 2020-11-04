@@ -57,8 +57,16 @@ void AudioThread::Close()
 void AudioThread::Clear()
 {
 	DecodeThread::Clear();
-	std::lock_guard<std::mutex> lck(amux);
+	//ap一定存在,不需要锁
+	//std::lock_guard<std::mutex> lck(amux);
 	if (ap)	ap->Clear();
+}
+
+void AudioThread::SetVolume(double volume)
+{
+	if (ap) {
+		ap->setVolume(volume);
+	}
 }
 
 void AudioThread::SetPause(bool isPause)
@@ -97,7 +105,6 @@ void AudioThread::run()
 			if (!frame)	break;
 
 			pts = decode->pts - ap->GetNoPlayPts();
-			//cout << "audio pts = " << pts << endl;
 			
 			//重采样
 			size = res->Resample(frame, pcm);
