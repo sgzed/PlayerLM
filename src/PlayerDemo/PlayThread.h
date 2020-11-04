@@ -11,39 +11,69 @@ class D3DVideoWidget;
 
 class PlayThread : public QThread
 {
+	Q_OBJECT
+
 public:
-	virtual bool Open(const char* url,IVideoCall* call);
-
-	//virtual bool Open(const char* url, D3DVideoWidget* call);
-
 	//启动所有线程
 	virtual void Start();
+
+	//打开文件开始播放
+	virtual bool Open(const char* url,IVideoCall* call = nullptr,bool init = true);
+
+	virtual void Seek(double progress);
+
+	void SetPause(bool isPause);
+
+	bool IsPause() {
+		return isPause;
+	}
+
+	long long GetDuration() {
+		return totalMs;
+	}
+
+	long long GetCurrentTime() {
+		return pts;
+	}
+
+	//下一个播放的url
+	void SetNextMedia(QString url);
+
+	void SetVolume(double volume);
 
 	//关闭线程，清理资源
 	virtual void Close();
 
+	PlayThread();
+	~PlayThread();
+
+protected:
+	void run();
+
 	//清理资源，Fix Seek时需要等待的Bug
 	virtual void Clear();
 
-	virtual void Seek(double progress);
+Q_SIGNALS:
+	void playFinished();
 
-	void run();
+public slots:
+	void onPlayFinisned();
 
-	PlayThread();
-	~PlayThread();
+protected:
 
 	bool isExit = false;
 	long long pts = 0;
 	long long totalMs = 0;
 
-	void SetPause(bool isPause);
 	bool isPause = false;
 
-protected:
 	std::mutex mux;
 
 	DemuxClass* demux = 0;
 	VideoThread* vt = 0;
 	AudioThread* at = 0;
+
+	QList<QString> playList;
+
 };
 

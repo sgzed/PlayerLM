@@ -7,7 +7,7 @@
 using std::cout;
 using std::endl;
 
-bool PlayThread::Open(const char* url, IVideoCall* call)
+bool PlayThread::Open(const char* url, IVideoCall* call,bool init)
 {
 	if (url == 0 || url[0] == '\0')
 		return false;
@@ -21,12 +21,15 @@ bool PlayThread::Open(const char* url, IVideoCall* call)
 		return false;
 	}
 	totalMs = demux->totalMs;
-	
-	//打开视频解码器和处理线程
-	if (!vt->Open(demux->CopyVPara(), call)) {
-		re = false;
-		cout << "vt->Open failed!" << endl;
+
+	if (init) {
+		re = vt->Open(demux->CopyVPara(), call);
 	}
+	else {
+		re = vt->Open(demux->CopyVPara());
+	}
+
+	if (!re)	cout << "vt->Open failed!" << endl;
 
 	if (demux->IsAudioExist()) {
 		if (!at) at = new AudioThread();
@@ -57,6 +60,8 @@ void PlayThread::Start()
 
 	if (!demux) demux = new DemuxClass();
 	if (!vt) vt = new VideoThread();
+
+	connect(this, SIGNAL(playFinished()), this, SLOT(onPlayFinisned()));
 
 	//启动当前线程
 	QThread::start();
@@ -114,7 +119,6 @@ void PlayThread::Seek(double progress)
 	}
 
 	if(!status)	SetPause(false);
-
 }
 
 void PlayThread::run()
@@ -146,15 +150,14 @@ void PlayThread::run()
 			if(demux->bFinished && !isExit) {
 				if (demux->IsAudioExist() ) {
 					if (vt->PktsEmpty() && at && at->PktsEmpty()) {
-						//cout << "paly end !!" << endl;
+						emit playFinished();
 					}
 				}
 				else {
 					if (vt->PktsEmpty()) {
-						//cout << "paly end !!" << endl;
+						emit playFinished();
 					}
 				}
-			
 			}
 
 			mux.unlock();
@@ -172,12 +175,9 @@ void PlayThread::run()
 		}
 
 		mux.unlock();
-
-		if(demux->IsAudioExist())
+		if (demux->IsAudioExist()) {
 			msleep(1);
-		else {
-			msleep((double)1000 / demux->frameRate);
-		}
+		}	
 	}
 }
 
@@ -199,4 +199,26 @@ void PlayThread::SetPause(bool isPause)
 	if (at) at->SetPause(isPause);
 	if (vt) vt->SetPause(isPause);
 
+}
+
+void PlayThread::SetNextMedia(QString url)
+{
+	//std::lock_guard<std::mutex> lck(mux);
+	playList.push_back(url);
+}
+
+void PlayThread::SetVolume(double volume)
+{
+	if (at) {
+		at->SetVolume(volume);
+	}
+}
+
+void PlayThread::onPlayFinisned() {
+	if (!playList.isEmpty()) {
+		auto url = playList.first();
+		playList.pop_front();
+		//playList.removeFirst();
+		Open(url.toLocal8Bit(), nullptr,false);
+	}
 }

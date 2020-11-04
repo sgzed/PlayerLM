@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 struct AVFrame;
 class DecodeClass;
 

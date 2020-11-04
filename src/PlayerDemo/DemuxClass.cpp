@@ -1,15 +1,20 @@
 #include "DemuxClass.h"
+#include <qfile.h>
 
 #include <iostream>
 using namespace std;
 
 extern "C" {
 	#include "libavformat/avformat.h"
+	#include "libavformat/avio.h"
+	#include <libavutil/file.h>
 }
 
 #pragma comment(lib,"avformat.lib")
 #pragma comment(lib,"avutil.lib")
 #pragma comment(lib,"avcodec.lib")
+
+#define BUFFE_OFFECT 2
 
 static double r2d(AVRational r) {
 	return r.den == 0 ? 0 : (double)r.num / (double)r.den;
@@ -23,6 +28,27 @@ static void freePara(AVCodecParameters* para) {
 	avcodec_parameters_free(&para);
 }
 
+int read_buffer(void* opaque, uint8_t* buf, int buf_size) {
+	FILE* fp_open = (FILE*)opaque;
+	if (!feof(fp_open)) {
+		int true_size = fread(buf, 1, buf_size, fp_open);
+		return true_size;
+	}
+	else {
+		return -1;
+	}
+}
+
+static int64_t seek(void* opaque, int64_t offset, int whence) {
+	FILE* fp_open = (FILE*)opaque;
+	if (whence == SEEK_SET && fseek(fp_open, offset + BUFFE_OFFECT, SEEK_SET) == 0) {
+		return offset;
+	}
+	// handling AVSEEK_SIZE doesn't seem mandatory
+	return -1;
+}
+
+
 DemuxClass::DemuxClass()
 {
 }
@@ -35,17 +61,46 @@ bool DemuxClass::Open(const char* url)
 {
 	Close();
 
+	QString file(url);
+	int re = 0;
 	lock_guard<mutex> lck(mMtx);
+
+	if (file.endsWith(".ndf")) {
+		m_pFile = fopen(url, "rb+");
+		if (!m_pFile) {
+			return false;
+		}
+		//解密:偏移BUFFE_OFFECT字节
+		fseek(m_pFile, BUFFE_OFFECT, 0);
+
+		if (!(mFmtCtx = avformat_alloc_context())) {
+			return false;
+		}
+
+		avio_ctx_buffer = (uint8_t*)av_malloc(avio_ctx_buffer_size);
+		if (!avio_ctx_buffer) {
+			return false;
+		}
+
+		avio_ctx = avio_alloc_context(avio_ctx_buffer, avio_ctx_buffer_size,
+			0, m_pFile, read_buffer, NULL, &seek);
+		
+		if (!avio_ctx) {
+			return false;
+		}
+
+		mFmtCtx->pb = avio_ctx;
+	}
 
 	//参数设置
 	AVDictionary* opts = NULL;
 
-	int re = avformat_open_input(&mFmtCtx, url,
+	re = avformat_open_input(&mFmtCtx, url,
 		nullptr,  // 0表示自动选择解封器
 		&opts //参数设置，比如rtsp的延时时间
 	);
 
-	if (re != 0){
+	if (re != 0) {
 		char buf[1024] = { 0 };
 		av_strerror(re, buf, sizeof(buf) - 1);
 		cout << "open " << url << " failed! :" << buf << endl;
@@ -62,7 +117,6 @@ bool DemuxClass::Open(const char* url)
 
 	//打印视频流详细信息
 	av_dump_format(mFmtCtx, 0, url, 0);
-
 
 	//获取视频流
 	mVideoStream = av_find_best_stream(mFmtCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);

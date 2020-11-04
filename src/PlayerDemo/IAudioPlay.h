@@ -16,6 +16,8 @@ public:
 	//播放音频
 	virtual bool Write(const unsigned char* data, int datasize) = 0;
 	virtual int GetFree() = 0;
+	//设置音量
+	virtual void setVolume(double volume) = 0;
 
 	virtual void SetPause(bool isPause) = 0;
 	virtual long long GetNoPlayPts() = 0;
@@ -40,6 +42,7 @@ public:
 	virtual bool Open() override;
 	virtual void Close() override;
 	virtual bool Write(const unsigned char* data, int datasize) override;
+	virtual void setVolume(double volume) override;
 	virtual int GetFree() override;
 	virtual long long GetNoPlayPts() override;
 	virtual void SetPause(bool isPause) override;

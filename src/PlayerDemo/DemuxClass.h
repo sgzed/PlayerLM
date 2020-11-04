@@ -7,6 +7,7 @@ struct AVFormatContext;
 struct AVPacket;
 struct AVCodecParameters;
 struct AVFrame;
+struct AVIOContext;
 
 struct AVStream;
 
@@ -71,5 +72,12 @@ protected:
 	int mAudioStream;
 	//解封装上下文
 	AVFormatContext* mFmtCtx = nullptr;
+
+	AVIOContext* avio_ctx = nullptr;
+	uint8_t* buffer = nullptr;
+	uint8_t* avio_ctx_buffer = nullptr;
+	size_t avio_ctx_buffer_size = 40960;
+
+	FILE* m_pFile = nullptr;
 };
 

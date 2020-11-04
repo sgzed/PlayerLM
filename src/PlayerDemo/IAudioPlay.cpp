@@ -67,6 +67,15 @@ bool CAudioPlay::Write(const unsigned char* data, int datasize)
 	return true;
 }
 
+void CAudioPlay::setVolume(double volume)
+{
+	std::lock_guard<std::mutex> lck(mMtx);
+
+	if (output) {
+		output->setVolume(volume);
+	}
+}
+
 int CAudioPlay::GetFree()
 {
 	std::lock_guard<std::mutex> lck(mMtx);

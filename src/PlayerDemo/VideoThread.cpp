@@ -2,18 +2,19 @@
 #include "DXVADecode.h"
 #include "D3DVideoWidget.h"
 
-bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para, IVideoCall* call, int width, int height)
+bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para)
 {
     if (!para) return false;
 	Clear();
 
     std::lock_guard<std::mutex> lck(vmux);
-    this->call = call;
-    if (this->call) {
-        //this->call->Init(width, height);
-    }
-	return true;
-   // return decode->Open(para,call,true);
+	synPts = 0;
+
+	if (decode->Open(para)) {
+		if (call) call->Init(decode);
+		return true;
+	}
+	return false;
 }
 
 bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para, IVideoCall* call)
@@ -23,6 +24,7 @@ bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para, IVideoCall* call
 
 	std::lock_guard<std::mutex> lck(vmux);
 	this->call = call;
+	synPts = 0;
 
 	if (decode->Open(para)) {
 		if (call) {
@@ -50,6 +52,12 @@ bool VideoThread::RepaintPts(std::shared_ptr<AVPacket> pkt, long long seekPts)
 	return false;
 }
 
+void VideoThread::Clear()
+{
+	DecodeThread::Clear();
+	lastPts = 0;
+}
+
 void VideoThread::run()
 {
 	bool ret = false;
@@ -65,7 +73,7 @@ void VideoThread::run()
 			continue;
 		}
 
-		if (synPts >0 &&  synPts < decode->pts) {
+		if (synPts >0 && synPts < decode->pts) {
 			vmux.unlock();
 			msleep(1);
 			continue;
@@ -83,7 +91,14 @@ void VideoThread::run()
 		while (!isExit) {
 			auto frame = decode->Recv();
 			if (!frame)	break;
-			
+
+			if (synPts == 0) {
+				vmux.unlock();
+				msleep(decode->pts - lastPts);
+				lastPts = decode->pts;
+				vmux.lock();
+			}
+				
 			if (call) {
 				call->Repaint(frame);
 			}
