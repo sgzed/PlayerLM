@@ -358,10 +358,13 @@ BOOL CD3DVidRender::Render_YUV(unsigned char * pdata, int img_width, int img_hei
 	if( ( UINT )rcCurrentClient.right != d3dpp.BackBufferWidth ||
 		( UINT )rcCurrentClient.bottom != d3dpp.BackBufferHeight )
 	{
-		d3dpp.BackBufferWidth = rcCurrentClient.right;
-		d3dpp.BackBufferHeight = rcCurrentClient.bottom;
+		if (rcCurrentClient.right && rcCurrentClient.bottom) {
 
-		InitD3D_YUV(d3dpp.hDeviceWindow, img_width, img_height);
+			d3dpp.BackBufferWidth = rcCurrentClient.right;
+			d3dpp.BackBufferHeight = rcCurrentClient.bottom;
+
+			InitD3D_YUV(d3dpp.hDeviceWindow, img_width, img_height);
+		}
 	}
 
 	if (m_pDirect3DDevice && m_pDirect3DDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)

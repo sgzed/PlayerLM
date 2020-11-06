@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>PlayerDemo</string>
   </property>
-  <widget class="D3DVideoWidget" name="widget" native="true">
+  <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -65,16 +65,21 @@
     <string>播放</string>
    </property>
   </widget>
+  <widget class="QSlider" name="volume">
+   <property name="geometry">
+    <rect>
+     <x>700</x>
+     <y>520</y>
+     <width>141</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>D3DVideoWidget</class>
-   <extends>QWidget</extends>
-   <header>D3DVideoWidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="PlayerDemo.qrc"/>
  </resources>
@@ -143,11 +148,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>volume</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>PlayerDemoClass</receiver>
+   <slot>VolumeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>759</x>
+     <y>537</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>758</x>
+     <y>641</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>OpenFile()</slot>
   <slot>PlayOrPause()</slot>
   <slot>SliderPressed()</slot>
   <slot>SliderReleased()</slot>
+  <slot>VolumeChanged(int)</slot>
  </slots>
 </ui>

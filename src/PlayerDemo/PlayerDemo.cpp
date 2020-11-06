@@ -2,15 +2,24 @@
 #include <qfiledialog.h>
 #include <qdebug.h>
 #include <qmessagebox.h>
+#include "D3DVideoWidget.h"
 #include "PlayThread.h"
+#include <qaudio.h>
 
 static PlayThread player;
+
+static D3DVideoWidget widget;
 
 PlayerDemo::PlayerDemo(QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
     player.Start();
+
+    QVector<QRect> rects;
+    rects.append(QRect(0, 0, 1920, 1080));
+    rects.append(QRect(1920, 0, 1920, 1080));
+    player.SetViewportRect(rects);
     startTimer(40);
 }
 
@@ -22,12 +31,14 @@ void PlayerDemo::OpenFile()
         return;
     }
     this->setWindowTitle(fileName);
-    if (!player.Open(fileName.toLocal8Bit(), this->ui.widget))
+    if (!player.Open(fileName.toLocal8Bit(), &widget))
     {
         QMessageBox::information(0, "error", "open file failed!");
         return;
     }
-    SetPause(player.isPause);
+    SetPause(player.IsPause());
+
+    player.SetNextMedia(fileName);
     //qDebug() << fileName;
 }
 
@@ -40,12 +51,13 @@ void PlayerDemo::timerEvent(QTimerEvent* e)
 {
     if (isSliderPressed) return;
 
-    long long total = player.totalMs;
+    static bool first = true;
+
+    long long total = player.GetDuration();
     if (total > 0) {
-        double progress = (double)player.pts / (double)total;
+        double progress = (double)player.GetCurrentTime() / (double)total;
         int v = ui.progress->maximum() * progress;
         ui.progress->setValue(v);
-       // qDebug() << "v = " << v;
     }
 }
 
@@ -59,7 +71,7 @@ void PlayerDemo::SetPause(bool isPause)
 
 void PlayerDemo::PlayOrPause()
 {
-    bool isPause = !player.isPause;
+    bool isPause = !player.IsPause();
     SetPause(isPause);
     player.SetPause(isPause);
 }
@@ -76,5 +88,14 @@ void PlayerDemo::SliderReleased()
     progress = (double)ui.progress->value() / (double)ui.progress->maximum();
 
     player.Seek(progress);
+}
+
+void PlayerDemo::VolumeChanged(int value)
+{
+    qreal linearVolume = QAudio::convertVolume(value / qreal(100),
+        QAudio::LogarithmicVolumeScale,
+        QAudio::LinearVolumeScale);
+
+     player.SetVolume(linearVolume);
 }
 

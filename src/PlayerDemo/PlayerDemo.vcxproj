@@ -43,7 +43,7 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <OutDir>..\..\bin\win64</OutDir>
+    <OutDir>..\..\bin\win64\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
@@ -53,6 +53,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\lib\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
@@ -99,11 +100,14 @@
     <ClCompile Include="D3DVideoWidget.cpp" />
     <ClCompile Include="D3DVidRender.cpp" />
     <ClCompile Include="DecodeThread.cpp" />
-    <ClCompile Include="ffmpeg_dxva2.cpp" />
+    <ClCompile Include="DXVADecode.cpp" />
+    <ClCompile Include="easylogging++.cc" />
+    <ClCompile Include="FFmpegDxva2.cpp" />
     <ClCompile Include="IAudioPlay.cpp" />
     <ClCompile Include="PlayThread.cpp" />
     <ClCompile Include="ResampleClass.cpp" />
     <ClCompile Include="VideoThread.cpp" />
+    <ClCompile Include="workerutil.cpp" />
     <ClCompile Include="XVideoWidget.cpp" />
     <QtRcc Include="PlayerDemo.qrc" />
     <QtUic Include="PlayerDemo.ui" />
@@ -115,15 +119,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioThread.h" />
+    <ClInclude Include="easylogging++.h" />
+    <ClInclude Include="singleton.h" />
+    <ClInclude Include="workerutil.h" />
     <QtMoc Include="D3DVideoWidget.h" />
     <ClInclude Include="D3DVidRender.h" />
     <ClInclude Include="DecodeClass.h" />
     <ClInclude Include="DecodeThread.h" />
     <ClInclude Include="DemuxClass.h" />
-    <ClInclude Include="ffmpeg_dxva2.h" />
+    <ClInclude Include="DXVADecode.h" />
+    <ClInclude Include="FFmpegDxva2.h" />
     <ClInclude Include="IAudioPlay.h" />
     <ClInclude Include="IVideoCall.h" />
-    <ClInclude Include="PlayThread.h" />
+    <QtMoc Include="PlayThread.h" />
     <ClInclude Include="ResampleClass.h" />
     <ClInclude Include="VideoThread.h" />
     <QtMoc Include="XVideoWidget.h" />

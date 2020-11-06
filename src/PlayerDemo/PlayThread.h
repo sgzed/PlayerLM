@@ -3,6 +3,8 @@
 #include <QThread>
 #include <mutex>
 #include "IVideoCall.h"
+#include <qvector.h>
+#include <qrect.h>
 
 class DemuxClass;
 class VideoThread;
@@ -41,6 +43,13 @@ public:
 
 	void SetVolume(double volume);
 
+	//设置视口Rect
+	static void SetViewportRect(QVector<QRect>& rects);
+
+	static QVector<QRect> GetViewportRect() {
+		return m_rtViewports;
+	}
+
 	//关闭线程，清理资源
 	virtual void Close();
 
@@ -75,5 +84,6 @@ protected:
 
 	QList<QString> playList;
 
+	static QVector<QRect> m_rtViewports;
 };
 

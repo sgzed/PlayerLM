@@ -16,6 +16,8 @@ public:
 
 	void Init(DecodeClass* decode) override;
 
+	void SetWindowOnWorker(int width, int height) override;
+
 	//不管成功与否都释放frame空间
 	virtual void Repaint(std::shared_ptr<AVFrame> frame);
 

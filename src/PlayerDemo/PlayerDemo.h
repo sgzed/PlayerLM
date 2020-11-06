@@ -23,6 +23,7 @@ public slots:
 
     void SliderPressed();
     void SliderReleased();
+    void VolumeChanged(int value);
 
 private:
     bool isSliderPressed;

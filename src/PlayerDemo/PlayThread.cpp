@@ -7,12 +7,18 @@
 using std::cout;
 using std::endl;
 
+QVector<QRect> PlayThread::m_rtViewports;
+
 bool PlayThread::Open(const char* url, IVideoCall* call,bool init)
 {
 	if (url == 0 || url[0] == '\0')
 		return false;
 
 	std::lock_guard<std::mutex> lck(mux);
+
+	if (isPause) {
+		SetPause(false);
+	}
 
 	//打开解封装
 	bool re = demux->Open(url);
@@ -212,6 +218,11 @@ void PlayThread::SetVolume(double volume)
 	if (at) {
 		at->SetVolume(volume);
 	}
+}
+
+void PlayThread::SetViewportRect(QVector<QRect>& rects)
+{
+	m_rtViewports = rects;
 }
 
 void PlayThread::onPlayFinisned() {

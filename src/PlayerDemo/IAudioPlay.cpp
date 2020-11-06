@@ -26,11 +26,18 @@ bool CAudioPlay::Open()
 	fmt.setChannelCount(channels);
 	fmt.setCodec("audio/pcm");
 	fmt.setByteOrder(QAudioFormat::LittleEndian);
-	fmt.setSampleType(QAudioFormat::UnSignedInt);
+	fmt.setSampleType(QAudioFormat::SignedInt);
 	
+	QAudioDeviceInfo deviceInfo = QAudioDeviceInfo::defaultOutputDevice();
+
+	if (!deviceInfo.isFormatSupported(fmt)) {
+		fmt = deviceInfo.nearestFormat(fmt);
+	}
+
 	std::lock_guard<std::mutex> lck(mMtx);
 
-	output = new QAudioOutput(fmt);
+	output = new QAudioOutput(deviceInfo,fmt);
+
 	io = output->start(); //开始播放
 	return io != nullptr;
 }

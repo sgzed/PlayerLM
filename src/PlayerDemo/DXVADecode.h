@@ -22,5 +22,6 @@ private:
 	struct SwsContext* img_convert_ctx = nullptr;
 
 	CD3DVidRender* mD3DVidRender = nullptr;
+
 };
 

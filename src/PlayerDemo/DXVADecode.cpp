@@ -1,5 +1,5 @@
 #include "DXVADecode.h"
-#include "ffmpeg_dxva2.h"
+#include "FFmpegDxva2.h"
 #include "D3DVidRender.h"
 
 extern "C" {
@@ -59,6 +59,7 @@ bool DXVADecode::HwAcceleration(HWND hwnd)
 				bAccel = true;
 				break;
 			}
+			bAccel = false;
 			reset = true;
 		}
 		default:
