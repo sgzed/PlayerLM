@@ -35,7 +35,7 @@ void TransparentWidget::Init()
 void TransparentWidget::SetTransparentGeometry(QRect rect)
 {
     setGeometry(rect);
-    label->setGeometry(rect);
+    label->setGeometry(0,0,rect.width(),rect.height());
 }
 
 void TransparentWidget::ChangeAlpha(double alpha)

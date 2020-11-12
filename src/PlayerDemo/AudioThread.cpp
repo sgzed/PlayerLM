@@ -69,6 +69,14 @@ void AudioThread::SetVolume(double volume)
 	}
 }
 
+double AudioThread::GetVolume()
+{
+	if (ap) {
+		return ap->GetVolume();
+	}
+	return 0.0;
+}
+
 void AudioThread::SetPause(bool isPause)
 {
 	//std::lock_guard<std::mutex> lck(amux);

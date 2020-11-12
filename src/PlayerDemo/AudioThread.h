@@ -23,6 +23,8 @@ public:
 
 	void SetVolume(double volume);
 
+	double GetVolume();
+
 	void SetPause(bool isPause);
 	bool isPause = false;
 

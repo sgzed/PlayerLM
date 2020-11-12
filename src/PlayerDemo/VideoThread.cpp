@@ -14,7 +14,10 @@ bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para, IVideoCall* call
 	if (decode->Open(para)) {
 		if (call) {
 			this->call = call;
-			call->Init(decode);
+		}
+
+		if (this->call) {
+			this->call->Init(decode);
 		}
 		return true;
 	}

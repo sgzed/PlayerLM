@@ -83,6 +83,16 @@ void CAudioPlay::setVolume(double volume)
 	}
 }
 
+double CAudioPlay::GetVolume()
+{
+	std::lock_guard<std::mutex> lck(mMtx);
+
+	if (output) {
+		return output->volume();
+	}
+	return 0.0;
+}
+
 int CAudioPlay::GetFree()
 {
 	std::lock_guard<std::mutex> lck(mMtx);
