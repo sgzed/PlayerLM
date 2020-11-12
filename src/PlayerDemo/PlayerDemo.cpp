@@ -2,21 +2,21 @@
 #include <qfiledialog.h>
 #include <qdebug.h>
 #include <qmessagebox.h>
-#include "D3DVideoWidget.h"
-#include "PlayThread.h"
 #include <qaudio.h>
 
-static PlayThread player;
+//static PlayThread player;
+//static D3DVideoWidget widget;
 
-static D3DVideoWidget widget;
 
 PlayerDemo::PlayerDemo(QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
-    player.Start();
+
+    //player.SetVideoCall(&vid);
 
     QVector<QRect> rects;
+
     rects.append(QRect(0, 0, 1920, 1080));
     rects.append(QRect(1920, 0, 1920, 1080));
     player.SetViewportRect(rects);
@@ -31,11 +31,13 @@ void PlayerDemo::OpenFile()
         return;
     }
     this->setWindowTitle(fileName);
-    if (!player.Open(fileName.toLocal8Bit(), &widget))
+   /* if (!player.Open(fileName.toLocal8Bit(), &vid))
     {
         QMessageBox::information(0, "error", "open file failed!");
         return;
-    }
+    }*/
+    player.SetCurrentMedia(fileName);
+    //player.SetCurrentMedia(fileName, &vid);
     SetPause(player.IsPause());
 
     player.SetNextMedia(fileName);
@@ -44,7 +46,7 @@ void PlayerDemo::OpenFile()
 
 PlayerDemo::~PlayerDemo()
 {
-    player.Close();
+    ;
 }
 
 void PlayerDemo::timerEvent(QTimerEvent* e)

@@ -40,13 +40,11 @@ void TransparentWidget::SetTransparentGeometry(QRect rect)
 
 void TransparentWidget::ChangeAlpha(double alpha)
 {
-    QString str = QString("QLabel{background-color:rgba(0,0,0,%1);}").arg(alpha);
-    label->setStyleSheet("");
-    label->setStyleSheet(str);
-    label->update();
+    QString strStyle = QString("QLabel{background-color:rgba(255,0,0,%1);}").arg(alpha);
+    label->setStyleSheet(strStyle);
+    //label->update();
     label->repaint();
     UpdateWindow((HWND)label->winId());
-
 }
 void TransparentWidget::onTimeOut()
 {

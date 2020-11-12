@@ -2,6 +2,8 @@
 
 #include <QtWidgets/QWidget>
 #include "ui_PlayerDemo.h"
+#include "VideoWidget.h" 
+#include "Player.h"
 
 class PlayerDemo : public QWidget
 {
@@ -25,8 +27,13 @@ public slots:
     void SliderReleased();
     void VolumeChanged(int value);
 
+   
 private:
     bool isSliderPressed;
     
     Ui::PlayerDemoClass ui;
+
+    //VideoWidget vid;
+    Player player;
+
 };
