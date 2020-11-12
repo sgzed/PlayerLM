@@ -5,11 +5,12 @@
 #include "IVideoCall.h"
 #include <qvector.h>
 #include <qrect.h>
+#include <qtimer.h>
 
 class DemuxClass;
 class VideoThread;
 class AudioThread;
-class D3DVideoWidget;
+class TransitionManager;
 
 class PlayThread : public QThread
 {
@@ -19,8 +20,10 @@ public:
 	//启动所有线程
 	virtual void Start();
 
-	//打开文件开始播放
-	virtual bool Open(const char* url,IVideoCall* call = nullptr,bool init = true);
+	void SetCurrentMedia(QString file, IVideoCall* call);
+
+	//打开文件开始播放,call=nullptr使用旧的
+	virtual bool Open(const char* url,IVideoCall* call);
 
 	virtual void Seek(double progress);
 
@@ -43,8 +46,10 @@ public:
 
 	void SetVolume(double volume);
 
+	double GetVolume();
+
 	//设置视口Rect
-	static void SetViewportRect(QVector<QRect>& rects);
+	void SetViewportRect(QVector<QRect>& rects);
 
 	static QVector<QRect> GetViewportRect() {
 		return m_rtViewports;
@@ -85,5 +90,7 @@ protected:
 	QList<QString> playList;
 
 	static QVector<QRect> m_rtViewports;
+
+	TransitionManager* m_transitionManager = nullptr;
 };
 

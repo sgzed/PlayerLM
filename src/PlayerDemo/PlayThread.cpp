@@ -3,13 +3,21 @@
 #include "AudioThread.h"
 #include "VideoThread.h"
 #include <iostream>
+#include "VideoWidget.h"
+#include "TransitionManager.h"
 
 using std::cout;
 using std::endl;
 
 QVector<QRect> PlayThread::m_rtViewports;
 
-bool PlayThread::Open(const char* url, IVideoCall* call,bool init)
+
+void PlayThread::SetCurrentMedia(QString file, IVideoCall* call)
+{
+	m_transitionManager->SetCurrentMedia(file, call);
+}
+
+bool PlayThread::Open(const char* url, IVideoCall* call)
 {
 	if (url == 0 || url[0] == '\0')
 		return false;
@@ -28,13 +36,8 @@ bool PlayThread::Open(const char* url, IVideoCall* call,bool init)
 	}
 	totalMs = demux->totalMs;
 
-	if (init) {
-		re = vt->Open(demux->CopyVPara(), call);
-	}
-	else {
-		re = vt->Open(demux->CopyVPara());
-	}
-
+	re = vt->Open(demux->CopyVPara(), call);
+	
 	if (!re)	cout << "vt->Open failed!" << endl;
 
 	if (demux->IsAudioExist()) {
@@ -66,6 +69,9 @@ void PlayThread::Start()
 
 	if (!demux) demux = new DemuxClass();
 	if (!vt) vt = new VideoThread();
+
+	if (!m_transitionManager) m_transitionManager = new TransitionManager(this);
+	m_transitionManager->Init();
 
 	connect(this, SIGNAL(playFinished()), this, SLOT(onPlayFinisned()));
 
@@ -220,9 +226,18 @@ void PlayThread::SetVolume(double volume)
 	}
 }
 
+double PlayThread::GetVolume()
+{
+	if (at) {
+		return at->GetVolume();
+	}
+	return 0.0;
+}
+
 void PlayThread::SetViewportRect(QVector<QRect>& rects)
 {
 	m_rtViewports = rects;
+	m_transitionManager->SetTransParentRects(rects);
 }
 
 void PlayThread::onPlayFinisned() {
@@ -230,6 +245,6 @@ void PlayThread::onPlayFinisned() {
 		auto url = playList.first();
 		playList.pop_front();
 		//playList.removeFirst();
-		Open(url.toLocal8Bit(), nullptr,false);
+		Open(url.toLocal8Bit(), nullptr);
 	}
 }

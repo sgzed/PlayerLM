@@ -10,10 +10,8 @@ struct AVPacket;
 class VideoThread : public DecodeThread
 {
 public:
-	//打开，不管成功与否都清理
-	virtual bool Open(std::shared_ptr<AVCodecParameters> para);
 
-	//打开，初始化新VideoCall
+	//打开，初始化新VideoCall,不管成功与否都清理
 	virtual bool Open(std::shared_ptr<AVCodecParameters> para, IVideoCall* call);
 	
 	//解码pkt到指定pts，并repaint

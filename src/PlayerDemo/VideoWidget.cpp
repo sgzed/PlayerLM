@@ -7,25 +7,26 @@
 VideoWidget::VideoWidget(QWidget* parent)
 	:QWidget(parent){
 	
+	show();
+	//showMinimized();
+
+	HWND m_hWnd = (HWND)winId();
+
+	WorkerWinManger::Instance()->AddToDesktop(m_hWnd);
+	SetWindowOnWorker(1920 * 2, 1080);
+	WorkerWinManger::Instance()->FlushDesktop();
 }
 
 
 void VideoWidget::Init(DecodeClass* decode)
 {
 
-	show();
-	//showMinimized();
-
-	HWND m_hWnd = (HWND)winId();
-	          
-	WorkerWinManger::Instance()->AddToDesktop(m_hWnd);
-	SetWindowOnWorker(1920*2,1080);
-
 	//LONG_PTR Style = ::GetWindowLongPtr(m_hWnd, GWL_STYLE);
 	//Style = Style & ~WS_CAPTION & ~WS_SYSMENU & ~WS_SIZEBOX;
 	//::SetWindowLongPtr(m_hWnd, GWL_STYLE, Style);
 	//auto hMenu = GetMenu(m_hWnd);
 	//SetMenu(m_hWnd, NULL);
+	HWND m_hWnd = (HWND)winId();
 
 	mDecode = decode;
 	bAccel = false;

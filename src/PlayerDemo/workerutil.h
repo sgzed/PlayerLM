@@ -41,6 +41,7 @@ public:
 
     ~WorkerWinManger();
     int     AddToDesktop (wnd_t wnd);
+    int     AddTransparentWnd(wnd_t wnd);
     int     RemoveFormDesktop (wnd_t wnd);
     void    SetWindowVisiable(wnd_t wnd, bool bShow);
     int     MoveWpWindow(wnd_t wnd, long left, long top, long right, long bottom);
@@ -50,7 +51,6 @@ public:
     void    FlushDesktop ();
     bool    IsWindowCovered(wnd_t hwnd, QRect rect= QRect());
     bool    MoveWindowOnWorkW(wnd_t hwnd, QRect rect);
-    HWND    GetDesktopParent();
 
 private:
     WorkerWinManger();

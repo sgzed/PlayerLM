@@ -2,32 +2,18 @@
 #include "DXVADecode.h"
 #include "D3DVideoWidget.h"
 
-bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para)
-{
-    if (!para) return false;
-	Clear();
-
-    std::lock_guard<std::mutex> lck(vmux);
-	synPts = 0;
-
-	if (decode->Open(para)) {
-		if (call) call->Init(decode);
-		return true;
-	}
-	return false;
-}
-
 bool VideoThread::Open(std::shared_ptr<AVCodecParameters> para, IVideoCall* call)
 {
 	if (!para) return false;
 	Clear();
 
 	std::lock_guard<std::mutex> lck(vmux);
-	this->call = call;
+	
 	synPts = 0;
 
 	if (decode->Open(para)) {
 		if (call) {
+			this->call = call;
 			call->Init(decode);
 		}
 		return true;

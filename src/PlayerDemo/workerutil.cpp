@@ -232,14 +232,63 @@ int WorkerWinManger::AddToDesktop (wnd_t wnd)
                 WS_EX_APPWINDOW
                 );
 
-    //if (updateWindowStyles(wnd, and1, ex_and, WS_CHILD, 0)) {
-    //    return 1;
-    //}
+    if (updateWindowStyles(wnd, and1, ex_and, WS_CHILD, 0)) {
+        return 1;
+    }
 
     wpMapRect(wnd, &r);
 
     if (!SetParent(wnd, wallpaper)) {
         LOG(ERROR)<<"SetParent failed, GLE=" << GetLastError() <<endl;
+        return 1;
+    }
+    mHwnd2ParentList.insert(wnd, GetParent(wnd));
+    MoveWpWindow(wnd, r.left, r.top, r.right, r.bottom);
+    FlushDesktop();
+    return 0;
+}
+
+int WorkerWinManger::AddTransparentWnd(wnd_t wnd)
+{
+   
+    wnd_t wallpaper = mWallpaper;
+    long and1, ex_and;
+    rect_t r;
+    if (wallpaper == nullptr) {
+        return 1;
+    }
+    
+    if (IsChild(wallpaper, wnd)) {
+        LOG(ERROR) << "already added\n";
+        return 0;
+    }
+
+    and1 = ~(
+        WS_CAPTION |
+        WS_THICKFRAME |
+        WS_SYSMENU |
+        WS_MAXIMIZEBOX |
+        WS_MINIMIZEBOX
+        );
+
+    ex_and = ~(
+        WS_EX_DLGMODALFRAME |
+        WS_EX_COMPOSITED |
+        WS_EX_WINDOWEDGE |
+        WS_EX_CLIENTEDGE |
+        WS_EX_STATICEDGE |
+        WS_EX_TOOLWINDOW |
+        WS_EX_APPWINDOW
+        );
+
+    if (updateWindowStyles(wnd, and1, ex_and, WS_CHILD, 0)) {
+        return 1;
+    }
+
+    wpMapRect(wnd, &r);
+
+    if (!SetParent(wnd, wallpaper)) {
+        LOG(ERROR) << "SetParent failed, GLE=" << GetLastError() << endl;
         return 1;
     }
     mHwnd2ParentList.insert(wnd, GetParent(wnd));
@@ -462,13 +511,6 @@ bool WorkerWinManger::MoveWindowOnWorkW(wnd_t hwnd, QRect rect)
         return false;
     }
     return true;
-}
-
-HWND WorkerWinManger::GetDesktopParent()
-{
-    wnd_t wallpaper = mWallpaper;
-    HWND hwnd = GetParent(wallpaper);
-    return hwnd;
 }
 
 
