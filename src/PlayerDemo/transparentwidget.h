@@ -22,9 +22,9 @@ protected:
 
     void paintEvent(QPaintEvent*);
 
-    void mousePressEvent(QMouseEvent* event);
+    //void mousePressEvent(QMouseEvent* event);
 
-    void mouseMoveEvent(QMouseEvent* event);
+    //void mouseMoveEvent(QMouseEvent* event);
 
 public slots:
     void onTimeOut();
